@@ -16,7 +16,7 @@ const Main = () => {
   };
 
   const handleDeleteNote = (index) => {
-    setNotes(notes.filter((_, i) => i !== index));
+    setNotes(notes.filter((_, currentIndex) => currentIndex !== index));
   };
 
   return (
@@ -36,24 +36,30 @@ const Main = () => {
           ADD NOTE
         </button>
         <ul className="flex flex-col gap-2">
-          {notes.map((note, index) => (
-            <li key={index} className="flex justify-between w-full">
-              {note}
-              <button className='flex justify-center items-center bg-blue-400 w-12 rounded'>
-                <BookMark width={24} />
-              </button>
-              <button
-                className="flex justify-center items-center bg-red-500 w-12 px-2 py-1 rounded"
-                type="button"
-                onClick={() => handleDeleteNote(index)}
-              >
-                <Trash width={24} />
-              </button>
+          {notes.map((note, noteIndex) => (
+            <li key={noteIndex} className="flex justify-between w-full">
+              <span>{note}</span>
+              <div className="flex gap-4">
+                <button
+                  type="button"
+                  className="flex justify-center items-center bg-blue-400 w-12 rounded"
+                >
+                  <BookMark width={24} />
+                </button>
+                <button
+                  className="flex justify-center items-center bg-red-500 w-12 px-2 py-1 rounded"
+                  type="button"
+                  onClick={() => handleDeleteNote(noteIndex)}
+                >
+                  <Trash width={24} />
+                </button>
+              </div>
             </li>
           ))}
         </ul>
         <button
           className="bg-blue-500 text-white px-4 py-2 rounded"
+          type="button"
           // onClick={handleAddNote}
         >
           SEE ALL
