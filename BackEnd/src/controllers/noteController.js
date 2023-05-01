@@ -1,15 +1,24 @@
 import Notes from "../models/noteModel.js";
 
 export const serverStatus = (req, res) => {
-	return res.json({
-		status: "success",
-		message: "El servidor está funcionando correctamente",
-	});
+	try {
+		return res.json({
+			status: "success",
+			message: "El servidor está funcionando correctamente",
+		});
+	} catch (error) {
+		return res.status(500).json({
+			status: "error",
+			message: "Error al obtener el estado del servidor",
+			error: error.message,
+		});
+	}
 };
 
 export const getAllNotes = async (req, res) => {
 	try {
 		const notes = await Notes.find();
+
 		if (notes.length === 0) {
 			const notFoundMessage = "No se han encontrado registros";
 			return res.status(404).json({ message: notFoundMessage });
@@ -17,8 +26,9 @@ export const getAllNotes = async (req, res) => {
 		const successMessage = "Registros obtenidos exitosamente";
 		res.status(200).json({ message: successMessage, notes });
 	} catch (error) {
-		const errorMessage = "Error al obtener los registros";
-		res.status(500).json({ message: errorMessage, error: error.message });
+		console.error(error);
+		const errorMessage = `Error al obtener los registros: ${error.message}`;
+		res.status(500).json({ message: errorMessage });
 	}
 };
 
