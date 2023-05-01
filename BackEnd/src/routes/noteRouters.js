@@ -1,17 +1,17 @@
 import { Router } from "express";
 import {
-	runServer,
+	serverStatus,
 	getAllNotes,
 	getNote,
 	newNote,
-	modicNote,
+	modifyNote,
 	deleteNote
 
 } from "../controllers/noteController.js";
 
 const router = Router();
 
-router.get("/", runServer);
+router.get("/", serverStatus);
 
 router.get("/all-notes", getAllNotes);
 
@@ -19,7 +19,7 @@ router.get("/note/:id", getNote);
 
 router.post("/new-note", newNote);
 
-router.put("/modic-note/:id", modicNote);
+router.put("/modic-note/:id", modifyNote);
 
 router.delete("/delete-note/:id", deleteNote);
 
