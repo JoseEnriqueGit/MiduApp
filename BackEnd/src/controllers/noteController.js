@@ -33,17 +33,17 @@ export const getAllNotes = async (req, res) => {
 };
 
 export const getNote = async (req, res) => {
+  const { id } = req.params;
   try {
-    const { id } = req.params;
-    const notes = await Notes.findOne({ _id: id }).lean();
-
-    if (!notes) {
-      const notFoundMessage = 'El registro solicitado no ha sido encontrado';
+    const note = await Notes.findById(id).orFail().lean();
+    const successMessage = 'Registro obtenido exitosamente';
+    res.status(200).json({ message: successMessage, note });
+  } catch (error) {
+    console.error(`Error al obtener el registro ${id}: ${error.message}`);
+    if (error.name === 'DocumentNotFoundError') {
+      const notFoundMessage = `El id ${id} no ha sido encontrado`;
       return res.status(404).json({ message: notFoundMessage });
     }
-    const successMessage = 'Registro obtenido exitosamente';
-    res.status(200).json({ message: successMessage, note: notes });
-  } catch (error) {
     const errorMessage = 'Error al obtener el registro';
     res.status(500).json({ message: errorMessage, error: error.message });
   }
