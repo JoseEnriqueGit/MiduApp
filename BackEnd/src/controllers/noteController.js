@@ -55,20 +55,37 @@ export const newNote = async (req, res) => {
     const successMessage = 'Registro creado exitosamente';
     res.status(201).json({ message: successMessage, note });
   } catch (error) {
+    console.error(`Error al crear el registro: ${error.message}`);
+    if (error instanceof mongoose.Error.ValidationError) {
+      const errorMessage = 'Error de validación al crear el registro';
+      return res
+        .status(400)
+        .json({ message: errorMessage, errors: error.errors });
+    }
     const errorMessage = 'Error al crear el registro';
     res.status(500).json({ message: errorMessage, error: error.message });
   }
 };
 
-export const modifyNote = async (req, res) => {
+const updateNote = async (id, data) => {
   try {
-    const { id } = req.params;
-    const note = await Notes.updateOne({ _id: id }, req.body, { upsert: true });
-    const successMessage = 'Registro actualizado exitosamente';
-    res.status(200).json({ message: successMessage, note });
+    const note = await Notes.updateOne({ _id: id }, data, { upsert: true });
+    return { success: true, note };
   } catch (error) {
+    console.error(`Error al modificar el registro: ${error.message}`);
+    return { success: false, error: error.message };
+  }
+};
+
+export const modifyNote = async (req, res) => {
+  const { id } = req.params;
+  const result = await updateNote(id, req.body);
+  if (result.success) {
+    const successMessage = 'Registro actualizado exitosamente';
+    res.status(200).json({ message: successMessage, note: result.note });
+  } else {
     const errorMessage = 'Error al actualizar el registro';
-    res.status(500).json({ message: errorMessage, error: error.message });
+    res.status(500).json({ message: errorMessage, error: result.error });
   }
 };
 
