@@ -15,7 +15,7 @@ export const serverStatus = (req, res) => {
   }
 };
 
-export const getAllNotes = async (req, res) => {
+export const getAllNotes = async (req, res, next) => {
   try {
     const notes = await Notes.find().lean();
 
@@ -26,9 +26,7 @@ export const getAllNotes = async (req, res) => {
     const successMessage = 'Registros obtenidos exitosamente';
     res.status(200).json({ message: successMessage, notes });
   } catch (error) {
-    console.error(error);
-    const errorMessage = `Error al obtener los registros: ${error.message}`;
-    res.status(500).json({ message: errorMessage });
+    next(error);
   }
 };
 
@@ -109,3 +107,4 @@ export const deleteNote = async (req, res) => {
     res.status(500).json({ message: errorMessage, error: error.message });
   }
 };
+
