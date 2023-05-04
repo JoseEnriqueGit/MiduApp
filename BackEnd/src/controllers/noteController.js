@@ -69,10 +69,14 @@ export const newNote = async (req, res) => {
 
 const updateNote = async (id, data) => {
   try {
-    const note = await Notes.updateOne({ _id: id }, data, { upsert: true });
-    return { success: true, note };
+    const existNote = await Notes.findById(id);
+    if (!existNote) {
+      return { success: false, error: 'Nota no encotrada' };
+    }
+    await Notes.updateOne({ _id: id }, data, { upsert: true });
+    return { success: true, note: existNote };
   } catch (error) {
-    console.error(`Error al modificar el registro: ${error.message}`);
+    console.error(`Error al modificar la nota: ${error.message}`);
     return { success: false, error: error.message };
   }
 };
@@ -81,10 +85,10 @@ export const modifyNote = async (req, res) => {
   const { id } = req.params;
   const result = await updateNote(id, req.body);
   if (result.success) {
-    const successMessage = 'Registro actualizado exitosamente';
+    const successMessage = 'Nota actualizado exitosamente';
     res.status(200).json({ message: successMessage, note: result.note });
   } else {
-    const errorMessage = 'Error al actualizar el registro';
+    const errorMessage = 'Error al actualizar la nota';
     res.status(500).json({ message: errorMessage, error: result.error });
   }
 };
@@ -92,11 +96,16 @@ export const modifyNote = async (req, res) => {
 export const deleteNote = async (req, res) => {
   try {
     const { id } = req.params;
-    const note = await Notes.deleteOne({ _id: id });
-    const successMessage = 'Registro eliminado exitosamente';
-    res.status(200).json({ message: successMessage, note });
+    const existNote = await Notes.findById(id);
+    if (!existNote) {
+      return res.status(404).json({ message: 'Nota no encontrada' });
+    }
+
+    await Notes.deleteOne({ _id: id });
+    const successMessage = 'Nota eliminada exitosamente';
+    res.status(200).json({ message: successMessage });
   } catch (error) {
-    const errorMessage = 'Error al eliminar el registro';
+    const errorMessage = 'Error al eliminar la nota';
     res.status(500).json({ message: errorMessage, error: error.message });
   }
 };
