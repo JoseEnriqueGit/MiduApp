@@ -7,5 +7,3 @@ async function connectDb() {
 }
 
 export default connectDb;
-
-// connectDb().catch((err) => console.log.o(err));
