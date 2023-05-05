@@ -1,37 +1,33 @@
 import cors from 'cors';
 import express from 'express';
 import Routers from './routes/noteRouters.js';
+import { routeNotFound } from './handleErrors/routeNotFound.js';
+import { serverError } from './handleErrors/serverError.js';
+import { notFoundError } from './handleErrors/notFoundError.js';
+import { newNoteError } from './handleErrors/newNoteError.js';
+import { updateNoteError } from './handleErrors/updateNoteError.js';
+import { errorHandler } from './handleErrors/errorHandler.js';
+
 
 const server = express();
 
 // middlewares
-// server.use(cors(), express.json());
-server.use(cors({
-  origin: 'http://localhost:3000',
-  optionsSuccessStatus: 200
-}), express.json());
+server.use(
+  cors({
+    origin: 'http://localhost:3000',
+    optionsSuccessStatus: 200,
+  }),
+  express.json()
+);
 
 // Routes
 server.use(Routers);
 
 // Error handling
-server.use((req, res) => {
-  res.status(404).json({ message: 'Ruta no encontrada' });
-});
+server.use(routeNotFound, errorHandler);
+// server.use(serverError);
 
-function errorHandler (err, req, res, next) {
-  console.error(err);
-  if (err.statusCode === 400) {
-    res.status(400).send(`Solicitud incorrecta ${err.message}`);
-  } else if (err.statusCode === 404) {
-    res.status(404).send('No se encontró el recurso solicitado');
-  } else {
-    res.status(500).send(`Ocurrió un error en el servidor: ${err.message}`);
-  }
-}
-
-server.use(errorHandler);
-
+// Server
 const PORT = process.env.PORT || 4000;
 
 async function runServer() {

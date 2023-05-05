@@ -30,20 +30,14 @@ export const getAllNotes = async (req, res, next) => {
   }
 };
 
-export const getNote = async (req, res) => {
+export const getNote = async (req, res, next) => {
   const { id } = req.params;
   try {
     const note = await Notes.findById(id).orFail().lean();
     const successMessage = 'Registro obtenido exitosamente';
     res.status(200).json({ message: successMessage, note });
   } catch (error) {
-    console.error(`Error al obtener el registro ${id}: ${error.message}`);
-    if (error.name === 'DocumentNotFoundError') {
-      const notFoundMessage = `El id ${id} no ha sido encontrado`;
-      return res.status(404).json({ message: notFoundMessage });
-    }
-    const errorMessage = 'Error al obtener el registro';
-    res.status(500).json({ message: errorMessage, error: error.message });
+    next(error);
   }
 };
 
@@ -53,41 +47,27 @@ export const newNote = async (req, res) => {
     const successMessage = 'Registro creado exitosamente';
     res.status(201).json({ message: successMessage, note });
   } catch (error) {
-    console.error(`Error al crear el registro: ${error.message}`);
-    if (error instanceof mongoose.Error.ValidationError) {
-      const errorMessage = 'Error de validación al crear el registro';
-      return res
-        .status(400)
-        .json({ message: errorMessage, errors: error.errors });
-    }
-    const errorMessage = 'Error al crear el registro';
-    res.status(500).json({ message: errorMessage, error: error.message });
+    next(error);
   }
 };
 
 const updateNote = async (id, data) => {
-  try {
-    const existNote = await Notes.findById(id);
-    if (!existNote) {
-      return { success: false, error: 'Nota no encotrada' };
-    }
-    await Notes.updateOne({ _id: id }, data, { upsert: true });
-    return { success: true, note: existNote };
-  } catch (error) {
-    console.error(`Error al modificar la nota: ${error.message}`);
-    return { success: false, error: error.message };
+  const { title, content } = data;
+  const updatedNote = await Notes.findByIdAndUpdate(id, { title, content }, { new: true, upsert: true });
+  if (!updatedNote) {
+    throw new Error('Nota no encontrada');
   }
+  return { note: updatedNote };
 };
 
-export const modifyNote = async (req, res) => {
-  const { id } = req.params;
-  const result = await updateNote(id, req.body);
-  if (result.success) {
-    const successMessage = 'Nota actualizado exitosamente';
+export const modifyNote = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const result = await updateNote(id, req.body);
+    const successMessage = 'Nota actualizada exitosamente';
     res.status(200).json({ message: successMessage, note: result.note });
-  } else {
-    const errorMessage = 'Error al actualizar la nota';
-    res.status(500).json({ message: errorMessage, error: result.error });
+  } catch (error) {
+    next(error);
   }
 };
 
@@ -107,4 +87,3 @@ export const deleteNote = async (req, res) => {
     res.status(500).json({ message: errorMessage, error: error.message });
   }
 };
-
