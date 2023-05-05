@@ -19,9 +19,9 @@ export const getAllNotes = async (req, res, next) => {
   try {
     const notes = await Notes.find().lean();
 
-    if (notes.length === 0) {
+    if (notes.length !== 0) {
       const notFoundMessage = 'No se han encontrado registros';
-      return res.status(404).json({ message: notFoundMessage });
+      // return res.status(404).json({ message: notFoundMessage });
     }
     const successMessage = 'Registros obtenidos exitosamente';
     res.status(200).json({ message: successMessage, notes });
